@@ -1,0 +1,9 @@
+{
+    "interval_ms": 5000,
+    "standby_threshold_mb": 4000,
+    "free_memory_threshold_mb": 0,
+    "interval_options": [500, 1000, 2000, 5000, 10000],
+    "standby_threshold_options": [0, 8000, 16000],
+    "free_memory_threshold_options": [0, 4000, 8000, 40000],
+    "ignore_list": ["cryonox", "cryonox miner13"]
+}
