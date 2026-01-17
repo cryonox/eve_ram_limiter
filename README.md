@@ -1,6 +1,6 @@
 # EVE RAM Limiter
 
-This utility tries to limit memory usage of EVE Online client processes by trimming their working sets. Several similar utilities exists for other applications [RAMLimiter](https://github.com/daddyonzaza/RAMLimiter), [discord-ram-limiter](https://github.com/farajyeet/discord-ram-limiter) or similar functionality [islc](https://www.wagnardsoft.com/forums/viewtopic.php?t=1256). However, none exists yet that specifically makes it convenient for eve online players.
+This utility tries to limit memory usage of EVE Online client processes by trimming their working sets. Several similar utilities exists for other applications [RAMLimiter](https://github.com/daddyonzaza/RAMLimiter), [discord-ram-limiter](https://github.com/farajyeet/discord-ram-limiter) or similar functionality [islc](https://www.wagnardsoft.com/forums/viewtopic.php?t=1256), [rammap](https://learn.microsoft.com/en-us/sysinternals/downloads/rammap). However, none exists yet that specifically makes it convenient for eve online players.
 
 ## What It Does
 
