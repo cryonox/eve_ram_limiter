@@ -71,6 +71,12 @@ When you trim a process's working set, Windows moves those memory pages to the *
 - **Reduced memory pressure** on systems running multiple clients
 - **Soft approach** - data stays in standby cache for quick recovery if needed
 
+### Caveats
+
+- **Reduced working set ≠ free RAM** - Trimmed memory moves to the standby list, not directly to free memory. The RAM is still occupied by cached data until another process claims it or you clear the standby list.
+- **Windows manages this automatically** - The OS already does this when memory pressure is high. Manual trimming just forces it to happen sooner.
+- **May not help if standby list is full** - If your standby list is already large, trimming working sets just shuffles data around without actually freeing usable memory.
+
 ### Benefits of Clearing Standby List
 
 - **Immediate free memory** - useful when you need RAM right now
