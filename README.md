@@ -77,6 +77,16 @@ When you trim a process's working set, Windows moves those memory pages to the *
 - **Windows manages this automatically** - The OS already does this when memory pressure is high. Manual trimming just forces it to happen sooner.
 - **May not help if standby list is full** - If your standby list is already large, trimming working sets just shuffles data around without actually freeing usable memory.
 
+### Why a Large Standby List Can Be a Problem
+
+While Windows is supposed to automatically reclaim standby memory when needed, this doesn't always work smoothly in practice. A bloated standby list can cause:
+
+- **Stuttering and micro-freezes** - Some applications experience hitches when Windows has to reclaim standby pages under pressure
+- **"Out of memory" errors despite having RAM** - Windows may report low memory even when gigabytes are sitting in standby
+- **Slow application launches** - New programs may struggle to allocate memory quickly when most RAM is in standby
+
+This is why memory cleaners like ISLC, RAMMap, and similar tools exist - they periodically flush the standby list to keep free memory available. Windows' memory management, while generally good, isn't perfect for all workloads.
+
 ### Benefits of Clearing Standby List
 
 - **Immediate free memory** - useful when you need RAM right now
@@ -85,6 +95,6 @@ When you trim a process's working set, Windows moves those memory pages to the *
 
 ### Downsides of Clearing Standby List
 
-- **Performance hit** - cached data is lost, causing more disk reads when processes need that data again
-- **Increased disk I/O** - especially noticeable on HDDs, less so on SSDs
+- **System-wide operation** - The standby list is global to Windows; there's no way to clear it only for EVE processes. When you clear the standby list, you're purging cached memory for *all* applications on your system, not just EVE. This means browsers, background apps, and other games will also lose their cached data.
+- **Theoretical performance hit** - Cached data is lost, which could cause more disk reads. In practice, this is rarely noticeable on modern SSDs/NVMe drives.
 - **Temporary benefit** - standby list will fill up again quickly
