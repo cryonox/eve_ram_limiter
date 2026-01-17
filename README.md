@@ -11,6 +11,19 @@ Features:
 - Character ignore list to skip specific accounts
 - Optional standby list clearing (disabled by default)
 
+### Before & After
+
+<table>
+  <tr>
+    <td><img src="before.png" alt="Before" width="400"/></td>
+    <td><img src="after.png" alt="After" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Before</em></td>
+    <td align="center"><em>After</em></td>
+  </tr>
+</table>
+
 ## How it works?
 
 The program uses the Windows API function `SetProcessWorkingSetSize` to trim process memory:
