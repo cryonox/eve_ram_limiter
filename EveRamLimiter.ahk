@@ -7,10 +7,10 @@ Persistent
 ; ============== Configuration ==============
 global Config := {
     IntervalMs: 2000,
-    StandbyThresholdMB: 0,
+    StandbyThresholdMB: 3000,
     FreeMemoryThresholdMB: 0,
     IntervalOptions: [500, 1000, 2000, 5000],
-    StandbyThresholdOptions: [0, 1000, 2000, 4000, 8000],
+    StandbyThresholdOptions: [0, 2000, 4000, 8000],
     FreeMemoryThresholdOptions: [0, 1000, 2000, 4000, 8000],
     IgnoreList: []
 }
