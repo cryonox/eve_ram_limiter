@@ -35,38 +35,37 @@ global MemoryPurgeStandbyList := 4
 ; ============== Load Config ==============
 LoadConfig() {
     configFile := A_ScriptDir "\config.json"
-    if !FileExist(configFile)
-        return
-    
-    content := FileRead(configFile)
-    
-    ; Simple JSON parsing for our specific format
-    if RegExMatch(content, '"interval_ms"\s*:\s*(\d+)', &m)
-        Config.IntervalMs := Integer(m[1])
-    if RegExMatch(content, '"standby_threshold_mb"\s*:\s*(\d+)', &m)
-        Config.StandbyThresholdMB := Integer(m[1])
-    if RegExMatch(content, '"free_memory_threshold_mb"\s*:\s*(\d+)', &m)
-        Config.FreeMemoryThresholdMB := Integer(m[1])
-    
-    ; Parse threshold options arrays
-    if RegExMatch(content, '"interval_options"\s*:\s*\[([^\]]+)\]', &m)
-        Config.IntervalOptions := ParseNumberArray(m[1])
-    if RegExMatch(content, '"standby_threshold_options"\s*:\s*\[([^\]]+)\]', &m)
-        Config.StandbyThresholdOptions := ParseNumberArray(m[1])
-    if RegExMatch(content, '"free_memory_threshold_options"\s*:\s*\[([^\]]+)\]', &m)
-        Config.FreeMemoryThresholdOptions := ParseNumberArray(m[1])
-    
-    ; Parse ignore_list array
-    if RegExMatch(content, '"ignore_list"\s*:\s*\[(.*?)\]', &m) {
-        listStr := m[1]
-        if listStr != "" {
-            Config.IgnoreList := StrSplit(listStr, ",")
-            for i, name in Config.IgnoreList
-                Config.IgnoreList[i] := Trim(name, ' `"')
+    if FileExist(configFile) {
+        content := FileRead(configFile)
+        
+        ; Simple JSON parsing for our specific format
+        if RegExMatch(content, '"interval_ms"\s*:\s*(\d+)', &m)
+            Config.IntervalMs := Integer(m[1])
+        if RegExMatch(content, '"standby_threshold_mb"\s*:\s*(\d+)', &m)
+            Config.StandbyThresholdMB := Integer(m[1])
+        if RegExMatch(content, '"free_memory_threshold_mb"\s*:\s*(\d+)', &m)
+            Config.FreeMemoryThresholdMB := Integer(m[1])
+        
+        ; Parse threshold options arrays
+        if RegExMatch(content, '"interval_options"\s*:\s*\[([^\]]+)\]', &m)
+            Config.IntervalOptions := ParseNumberArray(m[1])
+        if RegExMatch(content, '"standby_threshold_options"\s*:\s*\[([^\]]+)\]', &m)
+            Config.StandbyThresholdOptions := ParseNumberArray(m[1])
+        if RegExMatch(content, '"free_memory_threshold_options"\s*:\s*\[([^\]]+)\]', &m)
+            Config.FreeMemoryThresholdOptions := ParseNumberArray(m[1])
+        
+        ; Parse ignore_list array
+        if RegExMatch(content, '"ignore_list"\s*:\s*\[(.*?)\]', &m) {
+            listStr := m[1]
+            if listStr != "" {
+                Config.IgnoreList := StrSplit(listStr, ",")
+                for i, name in Config.IgnoreList
+                    Config.IgnoreList[i] := Trim(name, ' `"')
+            }
         }
     }
     
-    ; Ensure defaults are in option lists
+    ; Always ensure current values are in option lists (even without config file)
     Config.IntervalOptions := EnsureInOptions(Config.IntervalOptions, Config.IntervalMs)
     Config.StandbyThresholdOptions := EnsureInOptions(Config.StandbyThresholdOptions, Config.StandbyThresholdMB)
     Config.FreeMemoryThresholdOptions := EnsureInOptions(Config.FreeMemoryThresholdOptions, Config.FreeMemoryThresholdMB)
