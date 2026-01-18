@@ -307,6 +307,8 @@ global StandbyMenu := Menu()
 global FreeMemMenu := Menu()
 
 BuildTrayMenu() {
+    global IntervalMenu, StandbyMenu, FreeMemMenu
+    
     A_TrayMenu.Delete()
     
     ; Add status line (will be updated dynamically)
@@ -318,7 +320,7 @@ BuildTrayMenu() {
     A_TrayMenu.Add("Trim All Processes", TrimAllWorkingSetsManual)
     A_TrayMenu.Add()
     
-    ; Interval submenu (build once)
+    ; Interval submenu
     IntervalMenu := Menu()
     for ms in Config.IntervalOptions {
         IntervalMenu.Add(ms "ms", SetInterval.Bind(ms))
@@ -327,7 +329,7 @@ BuildTrayMenu() {
     }
     A_TrayMenu.Add("Interval", IntervalMenu)
     
-    ; Standby threshold submenu (build once)
+    ; Standby threshold submenu
     StandbyMenu := Menu()
     for mb in Config.StandbyThresholdOptions {
         label := mb == 0 ? "Disabled" : mb " MB"
@@ -337,7 +339,7 @@ BuildTrayMenu() {
     }
     A_TrayMenu.Add("Standby Threshold", StandbyMenu)
     
-    ; Free memory threshold submenu (build once)
+    ; Free memory threshold submenu
     FreeMemMenu := Menu()
     for mb in Config.FreeMemoryThresholdOptions {
         label := mb == 0 ? "Disabled" : mb " MB"
@@ -390,13 +392,27 @@ TogglePause(*) {
 }
 
 SetInterval(ms, *) {
-    global Config
+    global Config, IntervalMenu
+    ; Uncheck old, check new
+    oldLabel := Config.IntervalMs "ms"
+    newLabel := ms "ms"
+    try {
+        IntervalMenu.Uncheck(oldLabel)
+        IntervalMenu.Check(newLabel)
+    }
     Config.IntervalMs := ms
     SetTimer(TrimLoop, Config.IntervalMs)
 }
 
 SetStandbyThreshold(mb, *) {
-    global Config
+    global Config, StandbyMenu
+    ; Uncheck old, check new
+    oldLabel := Config.StandbyThresholdMB == 0 ? "Disabled" : Config.StandbyThresholdMB " MB"
+    newLabel := mb == 0 ? "Disabled" : mb " MB"
+    try {
+        StandbyMenu.Uncheck(oldLabel)
+        StandbyMenu.Check(newLabel)
+    }
     Config.StandbyThresholdMB := mb
     ; Warn if enabling standby clearing without admin rights
     if mb > 0 && !A_IsAdmin
@@ -404,7 +420,14 @@ SetStandbyThreshold(mb, *) {
 }
 
 SetFreeMemoryThreshold(mb, *) {
-    global Config
+    global Config, FreeMemMenu
+    ; Uncheck old, check new
+    oldLabel := Config.FreeMemoryThresholdMB == 0 ? "Disabled" : Config.FreeMemoryThresholdMB " MB"
+    newLabel := mb == 0 ? "Disabled" : mb " MB"
+    try {
+        FreeMemMenu.Uncheck(oldLabel)
+        FreeMemMenu.Check(newLabel)
+    }
     Config.FreeMemoryThresholdMB := mb
 }
 
