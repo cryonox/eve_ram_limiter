@@ -257,6 +257,27 @@ TrimEveWorkingSets() {
     State.EveTrimmed := eveTrimmed
 }
 
+TrimAllWorkingSets() {
+    trimmed := 0
+    myPid := DllCall("GetCurrentProcessId")
+    
+    for proc in ComObjGet("winmgmts:").ExecQuery("SELECT ProcessId FROM Win32_Process") {
+        pid := proc.ProcessId
+        if pid == myPid || pid == 0 || pid == 4  ; Skip self, System Idle, System
+            continue
+        if TrimProcessWorkingSet(pid)
+            trimmed++
+    }
+    
+    return trimmed
+}
+
+TrimAllWorkingSetsManual(*) {
+    trimmed := TrimAllWorkingSets()
+    TrayTip("Trimmed " trimmed " processes", "EVE RAM Trimmer", 1)  ; 1 = Info icon
+    UpdateTrayTip()
+}
+
 
 ; ============== Main Loop ==============
 TrimLoop() {
@@ -281,45 +302,51 @@ TrimLoop() {
 }
 
 ; ============== Tray Menu ==============
+global StatusMenuItem := "Status: Initializing..."
+global IntervalMenu := Menu()
+global StandbyMenu := Menu()
+global FreeMemMenu := Menu()
+
 BuildTrayMenu() {
     A_TrayMenu.Delete()
-    statusText := GetStatusText()
-    A_TrayMenu.Add(statusText, (*) => 0)
-    A_TrayMenu.Disable(statusText)
+    
+    ; Add status line (will be updated dynamically)
+    A_TrayMenu.Add(StatusMenuItem, (*) => 0)
+    A_TrayMenu.Disable(StatusMenuItem)
     A_TrayMenu.Add()
     
-    pauseText := State.Paused ? "Resume" : "Pause"
-    A_TrayMenu.Add(pauseText, TogglePause)
+    A_TrayMenu.Add("Pause", TogglePause)
+    A_TrayMenu.Add("Trim All Processes", TrimAllWorkingSetsManual)
     A_TrayMenu.Add()
     
-    ; Interval submenu
-    intervalMenu := Menu()
+    ; Interval submenu (build once)
+    IntervalMenu := Menu()
     for ms in Config.IntervalOptions {
-        intervalMenu.Add(ms "ms", SetInterval.Bind(ms))
+        IntervalMenu.Add(ms "ms", SetInterval.Bind(ms))
         if ms == Config.IntervalMs
-            intervalMenu.Check(ms "ms")
+            IntervalMenu.Check(ms "ms")
     }
-    A_TrayMenu.Add("Interval", intervalMenu)
+    A_TrayMenu.Add("Interval", IntervalMenu)
     
-    ; Standby threshold submenu
-    standbyMenu := Menu()
+    ; Standby threshold submenu (build once)
+    StandbyMenu := Menu()
     for mb in Config.StandbyThresholdOptions {
         label := mb == 0 ? "Disabled" : mb " MB"
-        standbyMenu.Add(label, SetStandbyThreshold.Bind(mb))
+        StandbyMenu.Add(label, SetStandbyThreshold.Bind(mb))
         if mb == Config.StandbyThresholdMB
-            standbyMenu.Check(label)
+            StandbyMenu.Check(label)
     }
-    A_TrayMenu.Add("Standby Threshold", standbyMenu)
+    A_TrayMenu.Add("Standby Threshold", StandbyMenu)
     
-    ; Free memory threshold submenu
-    freeMemMenu := Menu()
+    ; Free memory threshold submenu (build once)
+    FreeMemMenu := Menu()
     for mb in Config.FreeMemoryThresholdOptions {
         label := mb == 0 ? "Disabled" : mb " MB"
-        freeMemMenu.Add(label, SetFreeMemoryThreshold.Bind(mb))
+        FreeMemMenu.Add(label, SetFreeMemoryThreshold.Bind(mb))
         if mb == Config.FreeMemoryThresholdMB
-            freeMemMenu.Check(label)
+            FreeMemMenu.Check(label)
     }
-    A_TrayMenu.Add("Free Memory Threshold", freeMemMenu)
+    A_TrayMenu.Add("Free Memory Threshold", FreeMemMenu)
     
     A_TrayMenu.Add()
     A_TrayMenu.Add("Quit", QuitApp)
@@ -333,14 +360,34 @@ GetStatusText() {
 }
 
 UpdateTrayTip() {
-    TraySetIcon(A_AhkPath, 1)  ; Default AHK icon
-    A_IconTip := "EVE RAM Trimmer`n" GetStatusText()
-    BuildTrayMenu()
+    global StatusMenuItem
+    newStatus := GetStatusText()
+    
+    ; Only update menu if status changed
+    if newStatus != StatusMenuItem {
+        try {
+            A_TrayMenu.Rename(StatusMenuItem, newStatus)
+            StatusMenuItem := newStatus
+        }
+    }
+    
+    A_IconTip := "EVE RAM Trimmer`n" newStatus
+}
+
+UpdatePauseMenuItem() {
+    pauseText := State.Paused ? "Resume" : "Pause"
+    try {
+        if State.Paused
+            A_TrayMenu.Rename("Pause", "Resume")
+        else
+            A_TrayMenu.Rename("Resume", "Pause")
+    }
 }
 
 TogglePause(*) {
     State.Paused := !State.Paused
-    BuildTrayMenu()
+    UpdatePauseMenuItem()
+    UpdateTrayTip()
 }
 
 SetInterval(ms, *) {
